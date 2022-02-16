@@ -15,7 +15,6 @@ Intermediary server
 - Run poetry install
 - Run poetry shell
 - Run flask run 
-- Run pre-commit install
 
 ## Build Whit
 * Flask

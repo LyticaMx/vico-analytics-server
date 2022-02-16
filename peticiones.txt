@@ -1,0 +1,1 @@
+{'store_id': (None, 4), 'timestamp': (None, '2022-02-15T15:00:00.000000'), 'process': (None, 'gender'), 'status': (None, 'running'), 'tracking_id': (None, 15), 'centroid': (None, '50,50'), 'capture': ('2022-02-15T15:00:00.000000.jpg', <_io.BufferedReader name='/tmp/2022-02-15T15:00:00.000000.jpg'>)}

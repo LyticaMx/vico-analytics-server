@@ -6,15 +6,34 @@ from dataclasses import dataclass
 import requests
 from io import BytesIO
 from collections import deque
+from threading import *
+import time
 import cv2
 
 @dataclass
-class AcquisitionsAPI:
+class AcquisitionsAPI(Thread):
     """Class"""
 
-    def receive_data(self):
-        """b"""
+    def __init__(self):
+        self.queue_size = 3
+        self.cola = deque(maxlen=self.queue_size)
+    
+    def send_api_data(self, multipart_form_data):
+        """ """
 
+        # url = os.environ.get("ACQUISITION_API", None)
+        url = "https://dev.vico.ai/acquisition/monito"
+        response = requests.post(url=url, files=multipart_form_data)
+
+        return response
+
+    def validate_queue(self, data, file):
+        """ """
+
+        # file_name = file["capture"].read()
+        # # path = f"/tmp/{file_name}"
+
+        # data["capture"] = file_name
         cap = cv2.VideoCapture(0)
         _, frame = cap.read()
 
@@ -33,33 +52,21 @@ class AcquisitionsAPI:
             "centroid": (None, "50,50"), # Optional
             "capture": (file_name, open(path, "rb")),
         }
+        response  = self.send_api_data(multipart_form_data=multipart_form_data)
+        print(response)
+        try:
+            response.raise_for_status()
+        except (requests.exceptions.HTTPError, requests.ConnectionError, requests.Timeout):
+            if len(self.cola) < self.queue_size:
+                self.cola.append(data.items())
+            else:
+                with open('request.txt', 'a') as handler:
+                    data = str(data)
+                    handler.write("\n" + data)
 
-        return multipart_form_data
-    
-    def send_api_data(self, multipart_form_data):
-        """ """
+        return response.content
+        
 
-        # url = os.environ.get("ACQUISITION_API", None)
-        url = "https://dev.vico.ai/acquisition/monito"
-        response = requests.post(url=url, files=multipart_form_data)
-
-        return response
-
-    def validate_queue(self):
-        """ """
-
-        queue_size = 3
-        cola = deque(maxlen=queue_size)
-
-        while True:
-            multipart_form_data = self.receive_data()
-            response  = self.send_api_data(multipart_form_data=multipart_form_data)
-            try:
-                response.raise_for_status()
-            except (requests.exceptions.HTTPError, requests.ConnectionError, requests.Timeout):
-                if len(cola) < queue_size:
-                    cola.append(multipart_form_data.items())
-                else:
-                    filehandler = open('peticiones.txt', 'wt')
-                    data = str(multipart_form_data)
-                    filehandler.write(data)
+    def run(self):
+        # Aqui el codigo del hilo
+        print(self.cola)

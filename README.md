@@ -4,9 +4,9 @@ Intermediary server
 
 ### Prerequisites
 
-- Python 3.8+
-- Flaks 2.0+
-- requests 2.27+
+- Python 3.8
+- Flaks 2.0
+- requests 2.27
 - Poetry 1.0+
 
 ### Installing

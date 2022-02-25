@@ -6,9 +6,9 @@ from threading import *
 from flask_apscheduler import APScheduler
 from collections import deque
 
-
 # Modules
 from src.apis.acquisition_api import AcquisitionsAPI
+
 
 class Config:
     SCHEDULER_API_ENABLED = True
@@ -18,12 +18,9 @@ app = Flask(__name__)
 app.config.from_object(Config())
 # initialize scheduler
 scheduler = APScheduler()
-# if you don't wanna use a config, you can set options here:
 # scheduler.api_enabled = True
 scheduler.init_app(app)
 
-queue_size = 3
-cola = deque(maxlen=queue_size)
 
 @app.route("/", methods=["POST"])
 def main_acquisition():

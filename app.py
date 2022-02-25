@@ -1,35 +1,47 @@
 """Module to write the path of a new process"""
 
 # Libraries
-import threading
 from flask import Flask, request
 from threading import *
-import time
+from flask_apscheduler import APScheduler
+from collections import deque
+
 
 # Modules
 from src.apis.acquisition_api import AcquisitionsAPI
 
+class Config:
+    SCHEDULER_API_ENABLED = True
 
+# create app
 app = Flask(__name__)
+app.config.from_object(Config())
+# initialize scheduler
+scheduler = APScheduler()
+# if you don't wanna use a config, you can set options here:
+# scheduler.api_enabled = True
+scheduler.init_app(app)
 
-@app.route("/queue", methods=["POST"])
+queue_size = 3
+cola = deque(maxlen=queue_size)
+
+@app.route("/", methods=["POST"])
 def main_acquisition():
     """Execute process to send requests to acquisition_api"""
-
     payload_data = request.form.to_dict()
     payload_file = request.files
     cls_aquisition = AcquisitionsAPI()
-    response = cls_aquisition.validate_queue(data=payload_data, file=payload_file)
+    response, cola = cls_aquisition.validate_queue(data=payload_data, file_=payload_file)
 
     return response
 
 
-# Arranque del hilo
-hilo = AcquisitionsAPI()
-hilo = hilo.run()
-t = Timer(3.0, hilo)
-t.start()
-time.sleep(20)
+@scheduler.task('interval', id='do_job_1', seconds=5)
+def job1():
+    cls_aquisition = AcquisitionsAPI()
+    cls_aquisition.empty_queue()
+
+scheduler.start()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, threaded=True),
+    app.run(host='0.0.0.0')

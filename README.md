@@ -14,7 +14,10 @@ Intermediary server
 - Follow the variables in the .env.sample to a .env indicating your own credentials.
 - Run poetry install
 - Run poetry shell
-- Run flask run 
+- Run flask run
+
+## Run Uwsgi
+- Run uwsgi --socket 0.0.0.0:5000 --protocol=http -w wsgi:app --enable-threads --master
 
 ## Build Whit
 * Flask

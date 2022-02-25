@@ -31,13 +31,13 @@ def main_acquisition():
     payload_data = request.form.to_dict()
     payload_file = request.files
     cls_aquisition = AcquisitionsAPI()
-    response, cola = cls_aquisition.validate_queue(data=payload_data, file_=payload_file)
+    response = cls_aquisition.validate_queue(data=payload_data, file_=payload_file)
 
     return response
 
 
 @scheduler.task('interval', id='do_job_1', seconds=5)
-def job1():
+def job():
     cls_aquisition = AcquisitionsAPI()
     cls_aquisition.empty_queue()
 

@@ -17,8 +17,8 @@ class AcquisitionsAPI():
     def send_api_data(self, payload, image):
         """ """
 
-        # url = os.environ.get("ACQUISITION_API", None)
-        url = "https://dev.vico.ai/acquisition/visitor-counte"
+        url = os.environ.get("ACQUISITION_API")
+        # url = "https://dev.vico.ai/acquisition/visitor-counte"
         response = requests.post(url=url, files={"file": image, "visitor": (None, payload)},)
 
         return response
@@ -43,7 +43,7 @@ class AcquisitionsAPI():
                     data = str(data)
                     handler.write("\n" + data)
 
-        return response.content, cola
+        return response.content
 
     def empty_queue(self):
         print("cola")

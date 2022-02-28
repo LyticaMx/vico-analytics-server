@@ -2,20 +2,27 @@
 
 # Libraries
 import os
+import re
+import time
 import requests
+from urllib3.exceptions import MaxRetryError, NewConnectionError
 import redis
 from rq import Queue
 import logging
+from dotenv import load_dotenv, find_dotenv
 
 
 class ConsumeAPI():
     """Class to consume an API and queue requests"""
 
+    load_dotenv(find_dotenv())
+    logging.basicConfig(filename='myapp.log', level=logging.INFO)
+
     queue_size = 5
     redis_conn = redis.Redis(
                         host=os.environ.get("REDIS_HOST"),
-                        port=os.getenv("REDIS_PORT"),
-                        password=os.getenv("REDIS_PASSWORD"),
+                        port=os.environ.get("REDIS_PORT"),
+                        password=os.environ.get("REDIS_PASSWORD"),
                 )
     cola = Queue("low", connection=redis_conn)
 
@@ -25,6 +32,7 @@ class ConsumeAPI():
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
         response = requests.post(url=url, files=payload,)
+        time.sleep(3)
 
         return response
 
@@ -53,11 +61,17 @@ class ConsumeAPI():
 
         try:
             response.raise_for_status()
-        except (requests.exceptions.HTTPError, requests.ConnectionError, requests.Timeout):
+        except (requests.exceptions.HTTPError, 
+                requests.exceptions.ConnectionError, 
+                requests.exceptions.Timeout, 
+                requests.exceptions.RequestException,
+                MaxRetryError,
+                NewConnectionError):
             data["path"] = path
             if len(self.cola) < self.queue_size:
                 str_data = str(data)
                 self.queue = self.cola.enqueue(str_data)
+                logging.info('Queued request')
                 return response.content, response.status_code
             else:
                 with open('request.txt', 'a') as handler:
@@ -80,11 +94,10 @@ class ConsumeAPI():
     def empty_queue(self):
         """Forward requests to empty the queue"""
 
-        logging.basicConfig(filename='myapp.log', level=logging.INFO)
         if self.cola.count == 0:
             logging.info('Empty queue')
         else:
-            logging.info("Q: ", self.cola.get_jobs())
+            logging.info("Dequeue")
             queue_id =  self.cola.pop_job_id()
             fech_data = self.cola.fetch_job(job_id=queue_id)
             data = fech_data.to_dict()

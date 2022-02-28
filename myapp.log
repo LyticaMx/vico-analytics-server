@@ -1,0 +1,24 @@
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:24:45 CST)" executed successfully
+INFO:apscheduler.executors.default:Running job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:25:25 CST)" (scheduled at 2022-02-28 16:24:45.251714-06:00)
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:25:25 CST)" executed successfully
+INFO:apscheduler.executors.default:Running job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:26:05 CST)" (scheduled at 2022-02-28 16:25:25.251714-06:00)
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:26:05 CST)" executed successfully
+INFO:apscheduler.executors.default:Running job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:26:45 CST)" (scheduled at 2022-02-28 16:26:05.251714-06:00)
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:26:45 CST)" executed successfully
+INFO:apscheduler.executors.default:Running job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:27:25 CST)" (scheduled at 2022-02-28 16:26:45.251714-06:00)
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:27:25 CST)" executed successfully
+INFO:apscheduler.executors.default:Running job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:28:05 CST)" (scheduled at 2022-02-28 16:27:25.251714-06:00)
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:28:05 CST)" executed successfully
+INFO:werkzeug: * Detected change in '/home/roberto/Documents/Lytica/vico-analytics-server/src/apis/acquisition_api.py', reloading
+INFO:root:Cola Vacia
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:29:22 CST)" executed successfully
+INFO:werkzeug: * Detected change in '/home/roberto/Documents/Lytica/vico-analytics-server/src/apis/acquisition_api.py', reloading
+INFO:root:Empty queue
+INFO:apscheduler.executors.default:Job "job (trigger: interval[0:00:40], next run at: 2022-02-28 16:30:27 CST)" executed successfully
+INFO:werkzeug: * Detected change in '/home/roberto/Documents/Lytica/vico-analytics-server/app.py', reloading

@@ -10,7 +10,7 @@ from src.apis.acquisition_api import ConsumeAPI
 # create app
 app = Flask(__name__)
 
-@app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
+@app.route('/', defaults={'path': ''})
 @app.route("/<path:path>", methods=['GET', 'POST'])
 def main_acquisition(path):
     """Execute process to send requests to acquisition_api"""

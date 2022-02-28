@@ -5,6 +5,8 @@ import os
 import requests
 import redis
 from rq import Queue
+import logging
+
 
 class ConsumeAPI():
     """Class to consume an API and queue requests"""
@@ -65,7 +67,6 @@ class ConsumeAPI():
         return response.content, response.status_code
 
 
-
     def main(self, data, file_, path):
         """Method Main"""
         
@@ -78,19 +79,18 @@ class ConsumeAPI():
 
     def empty_queue(self):
         """Forward requests to empty the queue"""
-        
-        if self.cola.count > 0:
-            print("Q: ", self.cola.get_jobs())
-            queue_id =  self.cola.pop_job_id()
-            queue_index = queue_id.index(queue_id)
-            print("Position: ", queue_index)
-            data = self.cola.fetch_job(job_id=queue_id)
-            data = data.to_dict()
-            print("PAYLOAD: ", data)
-            payload = data["description"]
-            path = payload[0]["path"]
-            print("DATA: ", path)
-            # response  = self.send_api_data(payload=data, path=path)
-            # self.validate(response=response, data=payload)
+
+        logging.basicConfig(filename='myapp.log', level=logging.INFO)
+        if self.cola.count == 0:
+            logging.info('Empty queue')
         else:
-            print("Cola Vacia")
+            logging.info("Q: ", self.cola.get_jobs())
+            queue_id =  self.cola.pop_job_id()
+            fech_data = self.cola.fetch_job(job_id=queue_id)
+            data = fech_data.to_dict()
+            payload = data["description"]
+            payload_str = payload[:-2]
+            payload_send = eval(payload_str)
+            path = payload_send.pop("path")
+            response  = self.send_api_data(payload=payload_send, path=path)
+            self.validate_queue(response=response, data=payload_send, path=path)

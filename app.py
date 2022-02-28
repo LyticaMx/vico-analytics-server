@@ -1,44 +1,27 @@
 """Module to write the path of a new process"""
 
 # Libraries
-from flask import Flask, request
-from threading import *
-from flask_apscheduler import APScheduler
-from collections import deque
+from flask import Flask, request, Response
 
 # Modules
-from src.apis.acquisition_api import AcquisitionsAPI
+from src.apis.acquisition_api import ConsumeAPI
 
-
-class Config:
-    SCHEDULER_API_ENABLED = True
 
 # create app
 app = Flask(__name__)
-app.config.from_object(Config())
-# initialize scheduler
-scheduler = APScheduler()
-# scheduler.api_enabled = True
-scheduler.init_app(app)
 
-
-@app.route("/", methods=["POST"])
-def main_acquisition():
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
+@app.route("/<path:path>", methods=['GET', 'POST'])
+def main_acquisition(path):
     """Execute process to send requests to acquisition_api"""
+
     payload_data = request.form.to_dict()
     payload_file = request.files
-    cls_aquisition = AcquisitionsAPI()
-    response = cls_aquisition.validate_queue(data=payload_data, file_=payload_file)
+    cls_aquisition = ConsumeAPI()
+    response, status = cls_aquisition.main(data=payload_data, file_=payload_file, path=path)
 
-    return response
+    return Response(response, status)
 
-
-@scheduler.task('interval', id='do_job_1', seconds=5)
-def job():
-    cls_aquisition = AcquisitionsAPI()
-    cls_aquisition.empty_queue()
-
-scheduler.start()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run()

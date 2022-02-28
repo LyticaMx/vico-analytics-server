@@ -16,6 +16,9 @@ Intermediary server
 - Run poetry shell
 - Run flask run
 
+## Run Queue
+- Run rq worker
+
 ## Run Uwsgi
 - Run uwsgi --socket 0.0.0.0:5000 --protocol=http -w wsgi:app --enable-threads --master
 

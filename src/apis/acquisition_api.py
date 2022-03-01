@@ -21,7 +21,7 @@ class ConsumeAPI():
                         port=os.environ.get("REDIS_PORT"),
                         password=os.environ.get("REDIS_PASSWORD"),
                 )
-    cola = Queue("low", connection=redis_conn)
+    queue = Queue("low", connection=redis_conn)
 
     def send_api_data(self, payload, path):
         """Send data to the corresponding endpoint"""
@@ -63,9 +63,9 @@ class ConsumeAPI():
                 requests.exceptions.Timeout, 
                 requests.exceptions.RequestException,):
             data["path"] = path
-            if len(self.cola) < self.queue_size:
+            if len(self.queue) < self.queue_size:
                 str_data = str(data)
-                self.queue = self.cola.enqueue(str_data)
+                self.queued = self.queue.enqueue(str_data)
                 logging.info('Queued request')
                 return response.content, response.status_code
             else:
@@ -88,12 +88,12 @@ class ConsumeAPI():
     def empty_queue(self):
         """Forward requests to empty the queue"""
 
-        if self.cola.count == 0:
+        if self.queue.count == 0:
             logging.info('Empty queue')
         else:
             logging.info("Dequeue")
-            queue_id =  self.cola.pop_job_id()
-            fech_data = self.cola.fetch_job(job_id=queue_id)
+            queue_id =  self.queue.pop_job_id()
+            fech_data = self.queue.fetch_job(job_id=queue_id)
             data = fech_data.to_dict()
             payload = data["description"]
             payload_str = payload[:-2]

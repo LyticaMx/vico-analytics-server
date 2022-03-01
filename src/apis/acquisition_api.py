@@ -2,10 +2,7 @@
 
 # Libraries
 import os
-import re
-import time
 import requests
-from urllib3.exceptions import MaxRetryError, NewConnectionError
 import redis
 from rq import Queue
 import logging
@@ -18,7 +15,7 @@ class ConsumeAPI():
     load_dotenv(find_dotenv())
     logging.basicConfig(filename='myapp.log', level=logging.INFO)
 
-    queue_size = 5
+    queue_size = 30
     redis_conn = redis.Redis(
                         host=os.environ.get("REDIS_HOST"),
                         port=os.environ.get("REDIS_PORT"),
@@ -32,7 +29,6 @@ class ConsumeAPI():
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
         response = requests.post(url=url, files=payload,)
-        time.sleep(3)
 
         return response
 
@@ -56,17 +52,16 @@ class ConsumeAPI():
         return binary_image
 
 
-    def validate_queue(self, response, data, path):
+    def validate_queue(self, data, path):
         """Queue requests"""
-
+          
         try:
+            response = self.send_api_data(payload=data, path=path)
             response.raise_for_status()
         except (requests.exceptions.HTTPError, 
                 requests.exceptions.ConnectionError, 
                 requests.exceptions.Timeout, 
-                requests.exceptions.RequestException,
-                MaxRetryError,
-                NewConnectionError):
+                requests.exceptions.RequestException,):
             data["path"] = path
             if len(self.cola) < self.queue_size:
                 str_data = str(data)
@@ -86,8 +81,7 @@ class ConsumeAPI():
         
         binary_image = self.validate_request(file_=file_)
         data = self.format_request(data=data, image=binary_image)
-        response  = self.send_api_data(payload=data, path=path)
-        response, status = self.validate_queue(response=response, data=data, path=path)
+        response, status = self.validate_queue(data=data, path=path)
         
         return response, status
 
@@ -105,5 +99,5 @@ class ConsumeAPI():
             payload_str = payload[:-2]
             payload_send = eval(payload_str)
             path = payload_send.pop("path")
-            response  = self.send_api_data(payload=payload_send, path=path)
-            self.validate_queue(response=response, data=payload_send, path=path)
+            self.validate_queue(data=payload_send, path=path)
+            logging.info("A dequeue request was sent")

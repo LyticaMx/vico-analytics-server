@@ -41,7 +41,6 @@ class ConsumeAPI():
 
         return data
 
-
     def validate_request(self, file_):
         """Validate that the request has an image"""
 
@@ -53,7 +52,7 @@ class ConsumeAPI():
         return binary_image
 
     def queue_requests(self, path, data):
-        """ """
+        """Enqueue the request in string format"""
 
         data["path"] = path
         str_data = str(data)
@@ -62,7 +61,7 @@ class ConsumeAPI():
         return self.queued, str_data
 
     def write_request_to_file(self, path, data):
-        """ """
+        """Write in this file as requests that already enter the queue"""
 
         data["path"] = path
         if os.path.dirname("request.pickle"):
@@ -77,10 +76,9 @@ class ConsumeAPI():
             with open('request.pickle', 'wb') as handle:
                 pickle.dump(list_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-
-
-    def validate_queue(self, data, path):
-        """Queue requests"""
+    def verify_sending_request(self, data, path):
+        """Check if the request was sent with a satisfactory response, 
+           otherwise queue the request"""
           
         try:
             response = self.send_api_data(payload=data, path=path)
@@ -95,15 +93,13 @@ class ConsumeAPI():
             else:
                 self.write_request_to_file(path=path, data=data)
 
-
     def main(self, data, file_, path):
         """Method Main"""
         
         binary_image = self.validate_request(file_=file_)
         data = self.format_request(data=data, image=binary_image)
-        self.validate_queue(data=data, path=path)
+        self.verify_sending_request(data=data, path=path)
         
-
     def empty_queue(self):
         """Forward requests to empty the queue"""
 
@@ -117,12 +113,11 @@ class ConsumeAPI():
             payload_str = payload[:-2]
             payload_send = eval(payload_str)
             path = payload_send.pop("path")
-            self.validate_queue(data=payload_send, path=path)
+            self.verify_sending_request(data=payload_send, path=path)
             logging.info("A dequeue request was sent")
 
-
-    def extract_line_with_data(self):
-        """ """
+    def read_data_from_file(self):
+        """Read data from the file and send it to the api"""
 
         if os.path.dirname("request.pickle"):
             with open("request.pickle", "rb") as handle:
@@ -131,7 +126,7 @@ class ConsumeAPI():
             os.remove("request.pickle")
             for payload_send in payload:
                 pop_path = payload_send.pop("path")
-                self.validate_queue(data=payload_send, path=pop_path)
+                self.verify_sending_request(data=payload_send, path=pop_path)
         else:
             logging.info("The file does not exist")
             

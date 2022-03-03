@@ -7,14 +7,14 @@ import uwsgidecorators
 # Modules
 from src.apis.acquisition_api import ConsumeAPI
 
-@uwsgidecorators.timer(15)
+@uwsgidecorators.timer(5)
 def check_queue(self):
     """Run task to release queue every five minutes"""
 
     cls_api = ConsumeAPI()
     cls_api.empty_queue()
 
-@uwsgidecorators.timer(20)
+@uwsgidecorators.timer(7200)
 def check_file(self):
     """Run task to check if the .plickle file contains requests and send them to the api"""
 

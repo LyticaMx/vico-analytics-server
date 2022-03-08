@@ -15,8 +15,6 @@ logging.basicConfig(filename='RequestQueuer.log', level=logging.INFO)
 
 class RequestQueuer():
     """Class to consume an API and queue requests"""
-
-    load_dotenv(find_dotenv())
     
     queue_size = 10
     redis_conn = redis.Redis(

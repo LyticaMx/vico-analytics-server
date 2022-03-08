@@ -127,12 +127,10 @@ class RequestQueuer():
 
         if os.path.dirname("request.pickle"):
             logging.info("The file does not exist")
-            print("No existe")
             
         else:
             with open("request.pickle", "rb") as handle:
                 payloads = pickle.load(handle)
-                print(payloads)
             
             for payload_send in payloads:
                 pop_path = payload_send.pop("path")

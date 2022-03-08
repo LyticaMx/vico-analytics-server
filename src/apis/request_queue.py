@@ -9,13 +9,12 @@ from rq import Queue
 import logging
 import pickle
 
-#log configuration
 logging.basicConfig(filename='RequestQueuer.log', level=logging.INFO)
 
 class RequestQueuer():
     """Class to consume an API and queue requests"""
     
-    queue_size = 10
+    queue_size = 100
     redis_conn = redis.Redis(
                         host=os.environ.get("REDIS_HOST"),
                         port=os.environ.get("REDIS_PORT"),
@@ -66,15 +65,16 @@ class RequestQueuer():
         """Write in this file as requests that already enter the queue"""
 
         data["path"] = path
+        list_data = [data]
         if os.path.dirname("request.pickle"):
-            list_data = [data]
-            with open('request.pickle', 'wb') as handle:
-                pickle.dump(list_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        else:
             with open('request.pickle', 'rb') as handle:
                 list_data = pickle.load(handle)
             
             list_data.append(data)
+            with open('request.pickle', 'wb') as handle:
+                pickle.dump(list_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            
+        else:
             with open('request.pickle', 'wb') as handle:
                 pickle.dump(list_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -89,11 +89,14 @@ class RequestQueuer():
                 requests.exceptions.ConnectionError, 
                 requests.exceptions.Timeout, 
                 requests.exceptions.RequestException,):
-            if self.queue.count < self.queue_size:
-                self.queued = self.queue_requests(path=path, data=data)
-                logging.info('Queued request')
+            if response.status_code  != 404: 
+                if self.queue.count < self.queue_size:
+                    self.queued = self.queue_requests(path=path, data=data)
+                    logging.info('Queued request')
+                else:
+                    self.write_request_to_file(path=path, data=data)
             else:
-                self.write_request_to_file(path=path, data=data)
+                logging.info("The request cannot be queued. Client Error")
 
     def main(self, data, file_, path):
         """Method Main"""
@@ -123,13 +126,15 @@ class RequestQueuer():
         """Read data from the file and send it to the api"""
 
         if os.path.dirname("request.pickle"):
+            logging.info("The file does not exist")
+            print("No existe")
+            
+        else:
             with open("request.pickle", "rb") as handle:
                 payloads = pickle.load(handle)
+                print(payloads)
             
             for payload_send in payloads:
                 pop_path = payload_send.pop("path")
                 self.verify_sending_request(data=payload_send, path=pop_path)
                 sleep(1)
-        else:
-            logging.info("The file does not exist")
-            print("Vacio")

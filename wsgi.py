@@ -15,13 +15,6 @@ def check_queue(self):
     cls_api = RequestQueuer()
     cls_api.empty_queue()
 
-@uwsgidecorators.timer(7200)
-def check_file(self):
-    """Run task to check if the .plickle file contains requests and send them to the api"""
-
-    cls_api = RequestQueuer()
-    cls_api.read_data_from_file()
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -18,13 +18,12 @@ def main_consume_api(path):
     payload_data = request.form.to_dict()
     payload_file = request.files
     cls_api = RequestQueuer()
-    cls_api.main(data=payload_data, file_=payload_file, path=path)
-    # binary_image = cls_api.validate_request(file_=payload_file)
-    # data = cls_api.format_request(data=payload_data, image=binary_image)
-    # if cls_api.queue.count < cls_api.queue_size:
-    #     cls_api.queued = cls_api.queue_requests(path=path, data=data)
-    # else:
-    #     cls_api.write_request_to_file(path=path, data=data)
+    binary_image = cls_api.validate_request(file_=payload_file)
+    data = cls_api.format_request(data=payload_data, image=binary_image)
+    if cls_api.queue.count < cls_api.queue_size:
+        cls_api.queued = cls_api.queue_requests(path=path, data=data)
+    else:
+        cls_api.write_request_to_file(path=path, data=data)
 
     message_info = {"message": "Request accepted"}
     return make_response(jsonify(message_info), 202)

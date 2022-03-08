@@ -8,9 +8,8 @@ import redis
 from rq import Queue
 import logging
 import pickle
-from dotenv import load_dotenv, find_dotenv
 
-
+#log configuration
 logging.basicConfig(filename='RequestQueuer.log', level=logging.INFO)
 
 class RequestQueuer():

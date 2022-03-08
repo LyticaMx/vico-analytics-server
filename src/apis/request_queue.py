@@ -2,6 +2,7 @@
 
 # Libraries
 import os
+from time import sleep
 import requests
 import redis
 from rq import Queue
@@ -10,12 +11,13 @@ import pickle
 from dotenv import load_dotenv, find_dotenv
 
 
-class ConsumeAPI():
+logging.basicConfig(filename='RequestQueuer.log', level=logging.INFO)
+
+class RequestQueuer():
     """Class to consume an API and queue requests"""
 
     load_dotenv(find_dotenv())
-    logging.basicConfig(filename='myapp.log', level=logging.INFO)
-
+    
     queue_size = 10
     redis_conn = redis.Redis(
                         host=os.environ.get("REDIS_HOST"),
@@ -36,10 +38,13 @@ class ConsumeAPI():
     def format_request(self, data, image):
         """Format request to be accepted"""
 
-        data["file"] = image
-        data["visitor"] = (None, data["visitor"])
+        for key, value in data.items():
+            if key != "file":
+                key = {key: (None, value)}
+        
+            key["file"] = image
 
-        return data
+        return key
 
     def validate_request(self, file_):
         """Validate that the request has an image"""
@@ -58,7 +63,7 @@ class ConsumeAPI():
         str_data = str(data)
         self.queued = self.queue.enqueue(str_data)
 
-        return self.queued, str_data
+        return self.queued
 
     def write_request_to_file(self, path, data):
         """Write in this file as requests that already enter the queue"""
@@ -110,6 +115,7 @@ class ConsumeAPI():
             fech_data = self.queue.fetch_job(job_id=queue_id)
             data = fech_data.to_dict()
             payload = data["description"]
+            # Remove parentheses at the end of the payload_str to be able to convert it to dict
             payload_str = payload[:-2]
             payload_send = eval(payload_str)
             path = payload_send.pop("path")
@@ -121,12 +127,12 @@ class ConsumeAPI():
 
         if os.path.dirname("request.pickle"):
             with open("request.pickle", "rb") as handle:
-                payload = pickle.load(handle)
+                payloads = pickle.load(handle)
             
-            os.remove("request.pickle")
-            for payload_send in payload:
+            for payload_send in payloads:
                 pop_path = payload_send.pop("path")
                 self.verify_sending_request(data=payload_send, path=pop_path)
+                sleep(1)
         else:
             logging.info("The file does not exist")
-            
+            print("Vacio")

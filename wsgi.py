@@ -1,10 +1,10 @@
 """Module to run server with uwsgi"""
 
 # Libraries
-from app import app
 import uwsgidecorators
 
 # Modules
+from app import app
 from src.apis.request_queue import RequestQueuer
 
 

@@ -6,12 +6,12 @@ from flask import Flask, jsonify, make_response, request
 # Modules
 from src.apis.request_queue import RequestQueuer
 
-
 # create app
 app = Flask(__name__)
 
-@app.route('/', defaults={'path': ''})
-@app.route("/<path:path>", methods=['GET', 'POST'])
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>", methods=["GET", "POST"])
 def main_consume_api(path):
     """Execute process to send requests to api"""
 

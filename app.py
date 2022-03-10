@@ -19,7 +19,7 @@ def main_consume_api(path):
     payload_file = request.files
     cls_api = RequestQueuer()
     binary_image = cls_api.validate_request(file_=payload_file)
-    data = cls_api.format_request(data=payload_data, image=binary_image)
+    data = cls_api.format_request(data={**payload_data, **binary_image})
     if cls_api.queue.count < cls_api.queue_size:
         cls_api.queued = cls_api.queue_requests(path=path, data=data)
     else:

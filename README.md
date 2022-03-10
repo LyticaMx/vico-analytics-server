@@ -14,6 +14,7 @@ Intermediary server
 - Follow the variables in the .env.sample to a .env indicating your own credentials.
 - Run poetry install
 - Run poetry shell
+- Run pre-commit install
 - Run flask run
 
 ## Run Queue

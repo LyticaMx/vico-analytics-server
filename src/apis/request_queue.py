@@ -38,26 +38,26 @@ class RequestQueuer:
 
         return response
 
-    def format_request(self, data, image):
+    def format_request(self, data: dict):
         """Format request to be accepted"""
-
+        # Non-bytes values must be mapped into a tuple -> '(None, value)'
         for key, value in data.items():
-            if key != "file":
-                key = {key: (None, value)}
+            if type(value) != bytes:
+                data[key] = (None, value)
 
-            key["file"] = image
-
-        return key
+        return data
 
     def validate_request(self, file_):
         """Validate that the request has an image"""
 
         try:
-            binary_image = file_["file"].read()
-        except KeyError:
-            binary_image = None
+            # Fetch key from the InmutableDict so we can read the bytes-object
+            keyword = [*file_][0]
+            binary_image = file_[keyword].read()
+        except (KeyError, IndexError):
+            return {}
 
-        return binary_image
+        return {keyword: binary_image}
 
     def queue_requests(self, path, data):
         """Enqueue the request in string format"""

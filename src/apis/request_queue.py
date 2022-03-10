@@ -106,15 +106,16 @@ class RequestQueuer:
             requests.exceptions.Timeout,
             requests.exceptions.RequestException,
         ):
-            # Validate request status, status 404 do not queue
-            if response.status_code != 404:
+            # Validate request status, status in list do not queue
+            unqueued_status_list = [422, 400, 404, 405]
+            if response.status_code in unqueued_status_list:
+                logging.info("The request cannot be queued. Client Error")
+            else:
                 if self.queue.count < self.queue_size:
                     self.queued = self.queue_requests(path=path, data=data)
                     logging.info("Queued request")
                 else:
                     self.write_request_to_file(path=path, data=data)
-            else:
-                logging.info("The request cannot be queued. Client Error")
 
     def main(self, data, file_, path):
         """Method Main"""

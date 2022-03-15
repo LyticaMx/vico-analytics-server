@@ -1,6 +1,7 @@
 """Module to send requests"""
 
 # Libraries
+import json
 import logging
 import os
 import pickle
@@ -8,6 +9,7 @@ from time import sleep
 
 import redis
 import requests
+from dotenv import find_dotenv, load_dotenv
 from rq import Queue
 
 # Configure Loggiing
@@ -16,6 +18,8 @@ logging.basicConfig(filename="RequestQueuer.log", level=logging.INFO)
 
 class RequestQueuer:
     """Class to consume an API and queue requests"""
+
+    load_dotenv(find_dotenv())
 
     # Configure redis connection
     queue_size = 100
@@ -26,14 +30,26 @@ class RequestQueuer:
     )
     queue = Queue("low", connection=redis_conn)
 
-    def send_api_data(self, payload, path):
-        """Send data to the corresponding endpoint"""
+    def send_api_data_multuparte(self, payload, path):
+        """Send data multipart type to the corresponding endpoint"""
 
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
         response = requests.post(
             url=url,
             files=payload,
+        )
+
+        return response
+
+    def send_api_data_json(self, payload, path):
+        """Send data json type to the corresponding endpoint"""
+
+        url = os.environ.get("HOST_API")
+        url = f"{url}{path}"
+        response = requests.post(
+            url=url,
+            data=json.dumps(payload),
         )
 
         return response
@@ -98,7 +114,7 @@ class RequestQueuer:
         otherwise queue the request"""
 
         try:
-            response = self.send_api_data(payload=data, path=path)
+            response = self.send_api_data_multuparte(payload=data, path=path)
             response.raise_for_status()
         except (
             requests.exceptions.HTTPError,
@@ -138,6 +154,7 @@ class RequestQueuer:
             # to be able to convert it to dict
             payload_str = payload[:-2]
             payload_send = eval(payload_str)
+            "TODO: Validar el tipo del request(multupart o json)"
             path = payload_send.pop("path")
             self.verify_sending_request(data=payload_send, path=path)
             logging.info("A dequeue request was sent")

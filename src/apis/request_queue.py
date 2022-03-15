@@ -109,6 +109,14 @@ class RequestQueuer:
                     protocol=pickle.HIGHEST_PROTOCOL,
                 )
 
+    def enqueue_or_write_to_a_file(self, path, data):
+        """Validate queue size to know whether to enqueue or write to a file"""
+
+        if self.queue.count < self.queue_size:
+            self.queued = self.queue_requests(path=path, data=data)
+        else:
+            self.write_request_to_file(path=path, data=data)
+
     def verify_sending_request(self, data, path):
         """Check if the request was sent with a satisfactory response,
         otherwise queue the request"""

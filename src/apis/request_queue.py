@@ -8,7 +8,6 @@ from time import sleep
 
 import redis
 import requests
-from dotenv import find_dotenv, load_dotenv
 from rq import Queue
 
 # Configure Loggiing
@@ -17,8 +16,6 @@ logging.basicConfig(filename="RequestQueuer.log", level=logging.INFO)
 
 class RequestQueuer:
     """Class to consume an API and queue requests"""
-
-    load_dotenv(find_dotenv())
 
     # Configure redis connection
     queue_size = 100

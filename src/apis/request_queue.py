@@ -1,7 +1,6 @@
 """Module to send requests"""
 
 # Libraries
-import json
 import logging
 import os
 import pickle
@@ -30,27 +29,23 @@ class RequestQueuer:
     )
     queue = Queue("low", connection=redis_conn)
 
-    def send_api_data_multuparte(self, payload, path):
+    def send_api_data(self, payload, path):
         """Send data multipart type to the corresponding endpoint"""
 
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
-        response = requests.post(
-            url=url,
-            files=payload,
-        )
+        request_type = payload.pop("request_type")
 
-        return response
-
-    def send_api_data_json(self, payload, path):
-        """Send data json type to the corresponding endpoint"""
-
-        url = os.environ.get("HOST_API")
-        url = f"{url}{path}"
-        response = requests.post(
-            url=url,
-            data=json.dumps(payload),
-        )
+        if request_type == "multipart/form-data":
+            response = requests.post(
+                url=url,
+                files=payload,
+            )
+        elif request_type == "application/json":
+            response = requests.post(
+                url=url,
+                json=payload,
+            )
 
         return response
 
@@ -122,7 +117,7 @@ class RequestQueuer:
         otherwise queue the request"""
 
         try:
-            response = self.send_api_data_multuparte(payload=data, path=path)
+            response = self.send_api_data(payload=data, path=path)
             response.raise_for_status()
         except (
             requests.exceptions.HTTPError,
@@ -162,7 +157,6 @@ class RequestQueuer:
             # to be able to convert it to dict
             payload_str = payload[:-2]
             payload_send = eval(payload_str)
-            "TODO: Validar el tipo del request(multupart o json)"
             path = payload_send.pop("path")
             self.verify_sending_request(data=payload_send, path=path)
             logging.info("A dequeue request was sent")

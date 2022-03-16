@@ -21,10 +21,12 @@ def main_consume_api(path):
         payload_file = request.files
         binary_image = cls_api.validate_request(file_=payload_file)
         data = cls_api.format_request(data={**payload_data, **binary_image})
-        cls_api.enqueue_or_write_to_a_file(path=path, data=data)
     else:
-        cls_api.enqueue_or_write_to_a_file(path=path, data=data)
+        data = request.json
 
+    data = {**{"request_type": request.mimetype}, **data}
+
+    cls_api.enqueue_or_write_to_a_file(path=path, data=data)
     message_info = {"message": "Request accepted"}
     return make_response(jsonify(message_info), 202)
 

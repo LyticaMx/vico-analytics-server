@@ -26,15 +26,30 @@ class RequestQueuer:
     )
     queue = Queue("low", connection=redis_conn)
 
-    def send_api_data(self, payload, path):
-        """Send data to the corresponding endpoint"""
+    def build_url_to_consume(self, path):
+        """Get the host from environment variables and complete with path"""
 
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
-        response = requests.post(
-            url=url,
-            files=payload,
-        )
+
+        return url
+
+    def send_api_data(self, payload, path):
+        """Send data multipart type to the corresponding endpoint"""
+
+        url = self.build_url_to_consume(path=path)
+        request_type = payload.pop("request_type")
+
+        if request_type == "multipart/form-data":
+            response = requests.post(
+                url=url,
+                files=payload,
+            )
+        elif request_type == "application/json":
+            response = requests.post(
+                url=url,
+                json=payload,
+            )
 
         return response
 
@@ -92,6 +107,14 @@ class RequestQueuer:
                     handle,
                     protocol=pickle.HIGHEST_PROTOCOL,
                 )
+
+    def enqueue_or_write_to_a_file(self, path, data):
+        """Validate queue size to know whether to enqueue or write to a file"""
+
+        if self.queue.count < self.queue_size:
+            self.queued = self.queue_requests(path=path, data=data)
+        else:
+            self.write_request_to_file(path=path, data=data)
 
     def verify_sending_request(self, data, path):
         """Check if the request was sent with a satisfactory response,

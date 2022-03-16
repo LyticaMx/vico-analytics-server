@@ -15,16 +15,18 @@ app = Flask(__name__)
 def main_consume_api(path):
     """Execute process to send requests to api"""
 
-    payload_data = request.form.to_dict()
-    payload_file = request.files
     cls_api = RequestQueuer()
-    binary_image = cls_api.validate_request(file_=payload_file)
-    data = cls_api.format_request(data={**payload_data, **binary_image})
-    if cls_api.queue.count < cls_api.queue_size:
-        cls_api.queued = cls_api.queue_requests(path=path, data=data)
+    if request.json is None:
+        payload_data = request.form.to_dict()
+        payload_file = request.files
+        binary_image = cls_api.validate_request(file_=payload_file)
+        data = cls_api.format_request(data={**payload_data, **binary_image})
     else:
-        cls_api.write_request_to_file(path=path, data=data)
+        data = request.json
 
+    data = {**{"request_type": request.mimetype}, **data}
+
+    cls_api.enqueue_or_write_to_a_file(path=path, data=data)
     message_info = {"message": "Request accepted"}
     return make_response(jsonify(message_info), 202)
 

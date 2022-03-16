@@ -29,11 +29,18 @@ class RequestQueuer:
     )
     queue = Queue("low", connection=redis_conn)
 
-    def send_api_data(self, payload, path):
-        """Send data multipart type to the corresponding endpoint"""
+    def build_url_to_consume(self, path):
+        """Get the host from environment variables and complete with path"""
 
         url = os.environ.get("HOST_API")
         url = f"{url}{path}"
+
+        return url
+
+    def send_api_data(self, payload, path):
+        """Send data multipart type to the corresponding endpoint"""
+
+        url = self.build_url_to_consume(path=path)
         request_type = payload.pop("request_type")
 
         if request_type == "multipart/form-data":

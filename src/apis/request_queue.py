@@ -11,7 +11,12 @@ import requests
 from rq import Queue
 
 # Configure Loggiing
-logging.basicConfig(filename="RequestQueuer.log", level=logging.INFO)
+log_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+log_path = f"{log_path}/proxy-data/"
+logging.basicConfig(
+    filename=f"{log_path}RequestQueuer.log",
+    level=logging.INFO,
+)
 
 
 class RequestQueuer:
@@ -88,12 +93,15 @@ class RequestQueuer:
 
         data["path"] = path
         list_data = [data]
-        if os.path.dirname("request.pickle"):
-            with open("request.pickle", "rb") as handle:
+        pickle_path = os.path.dirname
+        (os.path.dirname(os.path.abspath(__file__)))
+        pickle_path = f"{pickle_path}/proxy-data/request.pickle"
+        if os.path.exists(pickle_path):
+            with open(pickle_path, "rb") as handle:
                 list_data = pickle.load(handle)
 
             list_data.append(data)
-            with open("request.pickle", "wb") as handle:
+            with open(pickle_path, "wb") as handle:
                 pickle.dump(
                     list_data,
                     handle,
@@ -101,7 +109,7 @@ class RequestQueuer:
                 )
 
         else:
-            with open("request.pickle", "wb") as handle:
+            with open(pickle_path, "wb") as handle:
                 pickle.dump(
                     list_data,
                     handle,
@@ -168,11 +176,14 @@ class RequestQueuer:
     def read_data_from_file(self):
         """Read data from the file and send it to the api"""
 
-        if os.path.dirname("request.pickle"):
+        pickle_path = os.path.dirname
+        (os.path.dirname(os.path.abspath(__file__)))
+        pickle_path = f"{pickle_path}/proxy-data/request.pickle"
+        if os.path.exists(pickle_path):
             logging.info("The file does not exist")
 
         else:
-            with open("request.pickle", "rb") as handle:
+            with open(pickle_path, "rb") as handle:
                 payloads = pickle.load(handle)
 
             for payload_send in payloads:

@@ -49,8 +49,8 @@ jobs:
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
           echo VERSION=$VERSION
           docker buildx build \
-          --platform linux/arm64 \
-          -f docker/Dockerfile \
+          --platform linux/amd64,linux/arm64 \
+          -f Dockerfile \
           --push \
           -t $IMAGE_ID:latest \
           -t $IMAGE_ID:$VERSION .

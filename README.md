@@ -1,5 +1,5 @@
 # vico-analytics-server
-Testing AMD architecture
+
 Intermediary server
 
 ### Prerequisites

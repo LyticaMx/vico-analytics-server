@@ -50,7 +50,7 @@ jobs:
           echo VERSION=$VERSION
           docker buildx build \
           --platform linux/arm64 \
-          -f docker/Dockerfile \
+          -f Dockerfile \
           --push \
           -t $IMAGE_ID:latest \
           -t $IMAGE_ID:$VERSION .

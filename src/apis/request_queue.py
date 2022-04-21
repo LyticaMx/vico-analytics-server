@@ -141,6 +141,7 @@ class RequestQueuer:
         try:
             response = self.send_api_data(payload=data, path=path)
             response.raise_for_status()
+            logging.debug("A dequeue request was sent")
         except (
             requests.exceptions.HTTPError,
             requests.exceptions.ConnectionError,
@@ -181,7 +182,6 @@ class RequestQueuer:
             payload_send = eval(payload_str)
             path = payload_send.pop("path")
             self.verify_sending_request(data=payload_send, path=path)
-            logging.debug("A dequeue request was sent")
 
     def read_data_from_file(self):
         """Read data from the file and send it to the api"""

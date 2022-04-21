@@ -14,9 +14,19 @@ from rq import Queue
 log_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 log_path = f"{log_path}/proxy-data/"
 logging.basicConfig(
-    filename=f"{log_path}RequestQueuer.log",
-    level=logging.INFO,
+    format="%(asctime)-5s %(name)-15s %(levelname)-8s %(message)s",
+    level=logging.DEBUG,
 )
+if logging.getLogger("").hasHandlers():
+    logging.getLogger("").handlers.clear()
+
+consola_handler = logging.StreamHandler()
+consola_handler.setLevel(logging.DEBUG)
+consola_handler_format = logging.Formatter(
+    "%(asctime)s-%(name)s-%(levelname)s-%(message)s"
+)
+consola_handler.setFormatter(consola_handler_format)
+logging.getLogger("").addHandler(consola_handler)
 
 
 class RequestQueuer:
@@ -140,11 +150,11 @@ class RequestQueuer:
             # Validate request status, status in list do not queue
             unqueued_status_list = [422, 400, 404, 405]
             if response.status_code in unqueued_status_list:
-                logging.info("The request cannot be queued. Client Error")
+                logging.debug("The request cannot be queued. Client Error")
             else:
                 if self.queue.count < self.queue_size:
                     self.queued = self.queue_requests(path=path, data=data)
-                    logging.info("Queued request")
+                    logging.debug("Queued request")
                 else:
                     self.write_request_to_file(path=path, data=data)
 
@@ -171,7 +181,7 @@ class RequestQueuer:
             payload_send = eval(payload_str)
             path = payload_send.pop("path")
             self.verify_sending_request(data=payload_send, path=path)
-            logging.info("A dequeue request was sent")
+            logging.debug("A dequeue request was sent")
 
     def read_data_from_file(self):
         """Read data from the file and send it to the api"""
@@ -180,7 +190,7 @@ class RequestQueuer:
         (os.path.dirname(os.path.abspath(__file__)))
         pickle_path = f"{pickle_path}/proxy-data/request.pickle"
         if os.path.exists(pickle_path):
-            logging.info("The file does not exist")
+            logging.debug("The file does not exist")
 
         else:
             with open(pickle_path, "rb") as handle:
